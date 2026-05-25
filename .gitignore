@@ -1,0 +1,46 @@
+# =========================
+# Node / Frontend
+# =========================
+node_modules/
+dist/
+.vite/
+
+# =========================
+# Python / Backend
+# =========================
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# =========================
+# Rust / Tauri
+# =========================
+target/
+
+# macOS
+.DS_Store
+
+# Linux
+*.swp
+
+# VS Code
+.vscode/
+
+# Environment files
+.env
+
+# Logs
+*.log
+
+# Coverage
+coverage/
+
+# Build outputs
+build/
+
+# Temporary files
+tmp/
+temp/
+
+back-env/
