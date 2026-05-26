@@ -1,18 +1,32 @@
 import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "./assets/vite.svg";
-import heroImg from "./assets/hero.png";
 import "./App.css";
 
 function App() {
   const [status, setStatus] = useState("Down");
-  async function handleButton(e) {
+  const [selected, setSelected] = useState("Select Repository");
+  const [active, setActive] = useState(false);
+  async function handleButton() {
     const res = await fetch("http://localhost:8000/health");
     const data = await res.json();
     setStatus(data.status);
   }
+
+  function handleSelect() {
+    setSelected("Select Another");
+    setActive(true);
+  }
+  function handleExec(e) {
+    setActive(true);
+  }
   return (
     <div>
+      <button onClick={handleSelect}>{selected}</button>
+      <button
+        onClick={() => alert("tree parse should start now")}
+        disabled={!(active)}
+      >
+        Explain!
+      </button>
       <button onClick={handleButton}>Health: {status}</button>
     </div>
   );

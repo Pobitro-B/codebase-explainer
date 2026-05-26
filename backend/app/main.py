@@ -1,5 +1,11 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+from pathlib import Path
+from app.services.scanner import root_scan
+
+class ScanRequest(BaseModel):
+    path: str
 
 app = FastAPI()
 
@@ -16,5 +22,9 @@ app.add_middleware(
 )
 
 @app.get("/health")
-def read_root():
+def health_check():
     return {"status": "backend alive"}
+
+@app.post("/scan-repo")
+async def read_root(req: ScanRequest):
+    return root_scan(req.path)
