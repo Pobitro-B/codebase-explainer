@@ -45,3 +45,7 @@
   padding-left: 10px;
   border-left: 1px solid #333;
 }
+.active-item{
+  background-color: #3f4446;
+  border-color: rgb(0, 110, 255);
+}

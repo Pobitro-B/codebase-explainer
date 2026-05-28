@@ -76,6 +76,7 @@ function App() {
               depth={1}
               setCurrFile={setFileOpen}
               handleOpen={handleFileOpen}
+              fileOpen={fileOpen}
             />
           ) : null}
         </div>

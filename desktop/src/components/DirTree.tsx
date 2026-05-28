@@ -33,7 +33,7 @@ export default function DirTree(props) {
             );
           } else {
             return isCollapsed ? null : (
-              <div className="file-item">
+              <div className={props.fileOpen == child["path"] ? "active-item file-item" : "file-item"}>
                 <button onClick={() => handleFileButton(child["path"])}>
                   <GoCodeSquare />
                   {child["name"]}
