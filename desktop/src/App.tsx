@@ -38,7 +38,7 @@ function App() {
 
     const result = await res.json();
     setRepoTree(result);
-    handleFileOpen("HOME_PAGE")
+    handleFileOpen("HOME_PAGE");
   }
 
   async function handleFileOpen(path) {
@@ -55,21 +55,36 @@ function App() {
   }
 
   return (
-    <div>
-      <input
-        type="text"
-        disabled
-        value={folder ? folder : "Select a repository"}
-      />
-      <button onClick={handleSelect}>{selected}</button>
-      <button onClick={handleExec} disabled={!active}>
-        Explain!
-      </button>
-      <button onClick={handleButton}>Health: {status}</button>
-      {repoTree ? (
-        <DirTree dirTree={repoTree} depth={1} setCurrFile={setFileOpen} handleOpen={handleFileOpen}/>
-      ) : null}
-      {repoTree && fileContent ? (<FileArea fileContent={fileContent}/>) : null}
+    <div className="app">
+      <div className="topbar">
+        <input
+          type="text"
+          disabled
+          value={folder ? folder : "Select a repository"}
+        />
+        <button onClick={handleSelect}>{selected}</button>
+        <button onClick={handleExec} disabled={!active}>
+          Explain!
+        </button>
+        <button onClick={handleButton}>Health: {status}</button>
+      </div>
+      <div className="workspace">
+        <div className="sidebar">
+          {repoTree ? (
+            <DirTree
+              dirTree={repoTree}
+              depth={1}
+              setCurrFile={setFileOpen}
+              handleOpen={handleFileOpen}
+            />
+          ) : null}
+        </div>
+        <div className="editor">
+          {repoTree && fileContent ? (
+            <FileArea fileContent={fileContent} />
+          ) : null}
+        </div>
+      </div>
     </div>
   );
 }

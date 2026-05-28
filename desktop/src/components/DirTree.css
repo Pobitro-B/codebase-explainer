@@ -1,0 +1,47 @@
+.tree-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  width: 100%;
+
+  background: transparent;
+  border: none;
+
+  color: #d4d4d4;
+
+  padding: 4px 8px;
+  border-radius: 6px;
+
+  cursor: pointer;
+  text-align: left;
+}
+.tree-item:hover {
+  background-color: #2a2d2e;
+}
+.file-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  width: 100%;
+
+  background: transparent;
+  border: none;
+
+  color: #c5c5c5;
+
+  padding: 4px 8px;
+  border-radius: 6px;
+
+  cursor: pointer;
+  text-align: left;
+}
+.file-item:hover {
+  background-color: #2a2d2e;
+}
+.tree-children {
+  margin-left: 10px;
+  padding-left: 10px;
+  border-left: 1px solid #333;
+}
