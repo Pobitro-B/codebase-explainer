@@ -1,0 +1,12 @@
+Welcome to Codebase Explainer
+
+Steps:
+1. Select a repository
+2. Click "Explain!"
+3. Browse files from the sidebar
+
+Future Features:
+- AI summaries
+- Dependency graphs
+- Semantic search
+- Architecture explanations

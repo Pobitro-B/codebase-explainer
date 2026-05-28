@@ -3,8 +3,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from pathlib import Path
 from app.services.scanner import root_scan
-
+from app.services.filereader import file_contents
 class ScanRequest(BaseModel):
+    path: str
+
+class ReadRequest(BaseModel):
     path: str
 
 app = FastAPI()
@@ -28,3 +31,7 @@ def health_check():
 @app.post("/scan-repo")
 async def read_root(req: ScanRequest):
     return root_scan(req.path)
+
+@app.post("/read-file")
+async def read_file(req: ReadRequest):
+    return file_contents(req.path)

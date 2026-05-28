@@ -15,7 +15,7 @@ def root_scan(path: str, root=None):
     p = Path(path)
     res["name"] = p.name
     res["type"] = "directory"
-    res["path"] = str((Path(path).resolve())) if not root else str((Path(path).resolve()).relative_to(Path(root).resolve()))
+    res["path"] = str((Path(path).resolve())) if not root else str((Path(path).resolve()))
     res["children"] = []
     if root is None:
         root = path
@@ -29,6 +29,6 @@ def root_scan(path: str, root=None):
             res["children"].append({
                 "name":entry.name,
                 "type":"file",
-                "path": str((Path(path) / entry.name).resolve().relative_to(Path(root).resolve()))
+                "path": str((Path(path) / entry.name).resolve())
             })
     return res

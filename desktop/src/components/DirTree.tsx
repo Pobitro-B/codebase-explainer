@@ -7,6 +7,10 @@ export default function DirTree(props) {
   function handleCollapse() {
     setIsCollapsed(isCollapsed ? false : true);
   }
+  function handleFileButton(path){
+    props.setCurrFile(path);
+    props.handleOpen(path);
+  }
   return (
     <div style={{paddingLeft: 5*props.depth}}>
       <button onClick={handleCollapse}>
@@ -15,13 +19,13 @@ export default function DirTree(props) {
       {dir["children"].map((child) => {
         if (child["type"] == "directory") {
           return isCollapsed ? null : (
-            <DirTree dirTree={child} depth={props.depth + 1} />
+            <DirTree dirTree={child} depth={props.depth + 1}  setCurrFile={props.setCurrFile} handleOpen={props.handleOpen}/>
           );
         } else {
           return isCollapsed ? null : (
-            <div style={{paddingLeft: 5*(props.depth+1)}}>
+            <button style={{paddingLeft: 5*(props.depth+1)}} onClick={()=>handleFileButton(child["path"])}>
               <GoCodeSquare />{child["name"]}
-            </div>
+            </button>
           );
         }
       })}
