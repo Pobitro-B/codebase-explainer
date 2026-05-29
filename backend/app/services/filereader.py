@@ -25,7 +25,6 @@ def file_contents(path: str):
         base_dir=str(Path(path).resolve().parent),
         project_root=str(Path.cwd()),
     )
-    print(analysis["imports"])
     return {
         "name": Path(path).name,
         "path": path,

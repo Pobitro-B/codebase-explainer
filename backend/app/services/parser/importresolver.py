@@ -270,7 +270,9 @@ def extract(
         "structure": [],
         "symbols": [],
     }
-
+    
+    if language not in RESOLVERS.keys():
+        return analysis
     # -----------------------------------------
     # Parse + Analyze
     # -----------------------------------------
