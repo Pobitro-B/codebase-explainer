@@ -1,79 +1,7 @@
 from pathlib import Path
-
-EXTENSION_MAP = {
-  # Web
-  "js": "javascript",
-  "mjs": "javascript",
-  "cjs": "javascript",
-  "jsx": "javascriptreact",
-
-  'ts': "typescript",
-  "tsx": "typescriptreact",
-
-  "html": "html",
-  "css": "css",
-  "scss": "scss",
-  "svelte": "svelte",
-  "vue": "vue",
-
-  # Backend
-  "py": "python",
-  "java": "java",
-  "go": "go",
-  "rs": "rust",
-  "php": "php",
-  "rb": "ruby",
-
-  # Systems
-  "c": "c",
-  "h": "c",
-  "cpp": "cpp",
-  "cc": "cpp",
-  "cxx": "cpp",
-  "hpp": "cpp",
-
-  "cs": "csharp",
-
-  # Mobile
-  "kt": "kotlin",
-  "swift": "swift",
-  "dart": "dart",
-
-  # Scripting
-  "sh": "bash",
-  "bash": "bash",
-  "zsh": "bash",
-  "ps1": "powershell",
-
-  # Data / Config
-  "json": "json",
-  "yaml": "yaml",
-  "yml": "yaml",
-  "toml": "toml",
-  "xml": "xml",
-
-  # Markup
-  "md": "markdown",
-
-  # SQL
-  "sql": "sql",
-
-  # Functional
-  "hs": "haskell",
-  "clj": "clojure",
-  "scm": "scheme",
-  "lisp": "lisp",
-
-  # Misc
-  "lua": "lua",
-  'r': "r",
-  "scala": "scala",
-  "pl": "perl",
-
-  # Notebooks
-  "ipynb": "json",
-  "txt": "text",
-}
+import tree_sitter_python as tspython
+from tree_sitter import Language, Parser
+from app.static.extensions import EXTENSION_MAP
 
 def file_contents(path: str):
     """_summary_
@@ -86,8 +14,47 @@ def file_contents(path: str):
     """
     if path == "HOME_PAGE":
         path = "./app/static/home.txt"
+    PY_LANGUAGE = Language(tspython.language())
+    parser = Parser(PY_LANGUAGE)
     with open(Path(path).resolve(), "r", encoding='utf-8') as f:
         content = f.readlines()
+    contentChunk = ''.join(content)
+    tree = parser.parse(bytes(contentChunk,"utf8"))
+    root = tree.root_node
+    imports = []
+    for child in root.children:
+        if child.type == "import_from_statement" or child.type == "import_statement":
+            module = None
+            importName = []
+            alias = None
+            for c in child.children:
+                if c.type == "dotted_name":
+                    if module is None:
+                        module = c.text.decode()
+                    else:
+                        importName.append(c.text.decode())
+                if c.type == "aliased_import":
+                    for sub in c.children:
+                        if sub.type == "dotted_name":
+                            module = sub.text.decode()
+                        if sub.type == "identifier":
+                            alias = sub.text.decode()
+            if alias:
+                imports.append({
+                    "type":"alias_import",
+                    "module": module,
+                    "alias": alias,
+                })
+            elif importName == []:
+                imports.append({
+                    "type":"import",
+                    "module":module})
+            else:
+                imports.append({
+                    "type":"from_import",
+                    "module":module,
+                    "import": importName
+                })
     try:
         lang = EXTENSION_MAP[Path(path).name.split(".")[-1]]
     except(KeyError):
@@ -96,5 +63,8 @@ def file_contents(path: str):
         "name": Path(path).name,
         "path": path,
         "content": content,
-        "language": lang
+        "language": lang,
+        "imports": imports
     }
+
+file_contents("./app/services/filereader.py")
