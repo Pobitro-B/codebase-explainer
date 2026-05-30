@@ -9,9 +9,10 @@ function App() {
   const [selected, setSelected] = useState("Select Repository");
   const [active, setActive] = useState(false);
   const [folder, setFolder] = useState<string | null>(null);
-  const [repoTree, setRepoTree] = useState(null);
+  const [repoTree, setRepoTree] = useState<any>(null);
   const [fileOpen, setFileOpen] = useState("HOME_PAGE");
-  const [fileContent, setFileContent] = useState(null);
+  const [fileContent, setFileContent] = useState<any>(null);
+  const [graph, setGraph] = useState<any>(null);
   async function handleButton() {
     const res = await fetch("http://localhost:8000/health");
     const data = await res.json();
@@ -37,7 +38,8 @@ function App() {
     });
 
     const result = await res.json();
-    setRepoTree(result);
+    setRepoTree(result["tree"]);
+    setGraph(result["graph"]);
     handleFileOpen("HOME_PAGE");
   }
 
@@ -77,6 +79,7 @@ function App() {
               setCurrFile={setFileOpen}
               handleOpen={handleFileOpen}
               fileOpen={fileOpen}
+              graph={graph}
             />
           ) : null}
         </div>

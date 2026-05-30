@@ -1,6 +1,23 @@
 from pathlib import Path
 
-IGNORE_DIRS = set(["node_modules", ".git", "target", "venv", "back-env", "__pycache__", "build", "dist", ".cache", ".env", ".next", ".idea"])
+IGNORE_DIRS = set(
+    [
+        "node_modules",
+        ".git",
+        "target",
+        "venv",
+        "back-env",
+        "__pycache__",
+        "build",
+        "dist",
+        ".cache",
+        ".env",
+        ".next",
+        ".idea",
+    ]
+)
+
+
 def root_scan(path: str, root=None):
     """_summary_
 
@@ -15,7 +32,9 @@ def root_scan(path: str, root=None):
     p = Path(path)
     res["name"] = p.name
     res["type"] = "directory"
-    res["path"] = str((Path(path).resolve())) if not root else str((Path(path).resolve()))
+    res["path"] = (
+        str((Path(path).resolve())) if not root else str((Path(path).resolve()))
+    )
     res["children"] = []
     if root is None:
         root = path
@@ -26,9 +45,11 @@ def root_scan(path: str, root=None):
             rc = root_scan(str((Path(path) / entry.name).resolve()), root)
             res["children"].append(rc)
         else:
-            res["children"].append({
-                "name":entry.name,
-                "type":"file",
-                "path": str((Path(path) / entry.name).resolve())
-            })
+            res["children"].append(
+                {
+                    "name": entry.name,
+                    "type": "file",
+                    "path": str((Path(path) / entry.name).resolve()),
+                }
+            )
     return res

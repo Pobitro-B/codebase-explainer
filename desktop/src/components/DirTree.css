@@ -1,4 +1,11 @@
-.tree-item {
+.tree-item,
+.file-item {
+  width: 100%;
+  border-radius: 6px;
+}
+
+.tree-item button,
+.file-item button {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -16,36 +23,38 @@
   cursor: pointer;
   text-align: left;
 }
-.tree-item:hover {
+
+.tree-item button:hover,
+.file-item button:hover {
   background-color: #2a2d2e;
 }
-.file-item {
-  display: flex;
-  align-items: center;
-  gap: 6px;
 
-  width: 100%;
-
-  background: transparent;
-  border: none;
-
-  color: #c5c5c5;
-
-  padding: 4px 8px;
-  border-radius: 6px;
-
-  cursor: pointer;
-  text-align: left;
-}
-.file-item:hover {
-  background-color: #2a2d2e;
-}
 .tree-children {
   margin-left: 10px;
   padding-left: 10px;
   border-left: 1px solid #333;
 }
-.active-item{
+
+/* Currently selected file */
+.active-item button {
   background-color: #3f4446;
-  border-color: rgb(0, 110, 255);
+  border-left: 3px solid rgb(0, 110, 255);
+}
+
+/* Files imported by current file */
+.dependency button {
+  background-color: rgba(34, 197, 94, 0.15);
+  border-left: 3px solid #22c55e;
+}
+
+/* Files that import current file */
+.dependent button {
+  background-color: rgba(249, 115, 22, 0.15);
+  border-left: 3px solid #f97316;
+}
+
+.active-item button:hover,
+.dependency button:hover,
+.dependent button:hover {
+  filter: brightness(1.1);
 }

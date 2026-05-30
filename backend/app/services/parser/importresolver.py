@@ -9,10 +9,10 @@ from tree_sitter_language_pack import (
     get_parser,
 )
 
-
 # =========================================================
 # Parser Loader
 # =========================================================
+
 
 def get_language_parser(language: str):
     try:
@@ -24,6 +24,7 @@ def get_language_parser(language: str):
 # =========================================================
 # Python Resolver
 # =========================================================
+
 
 def resolve_python_import(
     raw: str,
@@ -128,6 +129,7 @@ def resolve_python_import(
 # JS / TS Resolver
 # =========================================================
 
+
 def resolve_js_import(
     raw: str,
     base_dir: str,
@@ -187,6 +189,7 @@ def resolve_js_import(
 # Rust Resolver
 # =========================================================
 
+
 def resolve_rust_import(
     raw: str,
     base_dir: str,
@@ -208,7 +211,7 @@ def resolve_rust_import(
     # -----------------------------------------
 
     if raw.startswith("crate::"):
-        parts = raw[len("crate::"):].split("::")
+        parts = raw[len("crate::") :].split("::")
 
         candidates = [
             Path(project_root) / "src" / Path(*parts).with_suffix(".rs"),
@@ -239,6 +242,7 @@ RESOLVERS = {
 # Generic Resolver Dispatcher
 # =========================================================
 
+
 def resolve_import(
     language: str,
     raw: str,
@@ -258,6 +262,7 @@ def resolve_import(
 # Main Extractor
 # =========================================================
 
+
 def extract(
     language: str,
     content_chunk: str,
@@ -270,7 +275,7 @@ def extract(
         "structure": [],
         "symbols": [],
     }
-    
+
     if language not in RESOLVERS.keys():
         return analysis
     # -----------------------------------------
@@ -296,22 +301,24 @@ def extract(
 
         raw = imp.source
 
-        analysis["imports"].append({
-            "raw": raw,
-            "resolved_path": resolve_import(
-                language=language,
-                raw=raw,
-                base_dir=base_dir,
-                project_root=project_root,
-            ),
-            "items": imp.items,
-            "alias": imp.alias,
-            "is_wildcard": imp.is_wildcard,
-            "span": {
-                "start_line": imp.span.start_line,
-                "end_line": imp.span.end_line,
-            },
-        })
+        analysis["imports"].append(
+            {
+                "raw": raw,
+                "resolved_path": resolve_import(
+                    language=language,
+                    raw=raw,
+                    base_dir=base_dir,
+                    project_root=project_root,
+                ),
+                "items": imp.items,
+                "alias": imp.alias,
+                "is_wildcard": imp.is_wildcard,
+                "span": {
+                    "start_line": imp.span.start_line,
+                    "end_line": imp.span.end_line,
+                },
+            }
+        )
 
     # =====================================================
     # Structure
@@ -319,18 +326,20 @@ def extract(
 
     for item in result.structure:
 
-        analysis["structure"].append({
-            "kind": str(item.kind),
-            "name": item.name,
-            "visibility": item.visibility,
-            "signature": item.signature,
-            "decorators": item.decorators,
-            "doc_comment": item.doc_comment,
-            "span": {
-                "start_line": item.span.start_line,
-                "end_line": item.span.end_line,
-            },
-        })
+        analysis["structure"].append(
+            {
+                "kind": str(item.kind),
+                "name": item.name,
+                "visibility": item.visibility,
+                "signature": item.signature,
+                "decorators": item.decorators,
+                "doc_comment": item.doc_comment,
+                "span": {
+                    "start_line": item.span.start_line,
+                    "end_line": item.span.end_line,
+                },
+            }
+        )
 
     # =====================================================
     # Symbols
@@ -338,15 +347,16 @@ def extract(
 
     for symbol in result.symbols:
 
-        analysis["symbols"].append({
-            "name": symbol.name,
-            "kind": str(symbol.kind),
-            "type_annotation": symbol.type_annotation,
-            "doc": symbol.doc,
-            "span": {
-                "start_line": symbol.span.start_line,
-                "end_line": symbol.span.end_line,
-            },
-        })
-
+        analysis["symbols"].append(
+            {
+                "name": symbol.name,
+                "kind": str(symbol.kind),
+                "type_annotation": symbol.type_annotation,
+                "doc": symbol.doc,
+                "span": {
+                    "start_line": symbol.span.start_line,
+                    "end_line": symbol.span.end_line,
+                },
+            }
+        )
     return analysis
