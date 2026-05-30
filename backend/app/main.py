@@ -68,7 +68,7 @@ async def file_context_builder(req: ContextRequest):
     file_data = file_contents(req.path)
     return {
         "file": req.path,
-        "content": file_data["content"],
+        "content": "".join(file_data["content"]),
         "language": file_data["language"],
         "dependencies": CURRENT_PROJECT["graph"]["dependencies"].get(req.path, []),
         "dependents": CURRENT_PROJECT["graph"]["dependents"].get(req.path, []),
