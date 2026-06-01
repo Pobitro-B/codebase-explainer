@@ -83,3 +83,25 @@ body {
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+.workspace {
+  display: flex;
+  height: 100%;
+}
+
+.sidebar {
+  width: 20%;
+}
+
+.editor {
+  width: 40%;
+}
+
+.explanation-panel {
+  width: 40%;
+  padding: 1rem;
+  overflow-y: auto;
+  border-left: 1px solid #333;
+  background: #1e1e1e;
+  text-align: left;
+}

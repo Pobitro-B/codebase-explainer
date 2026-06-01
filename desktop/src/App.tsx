@@ -3,6 +3,7 @@ import "./App.css";
 import { open } from "@tauri-apps/plugin-dialog";
 import DirTree from "./components/DirTree";
 import FileArea from "./components/FileArea";
+import ReactMarkdown from "react-markdown";
 
 function App() {
   const [status, setStatus] = useState("Down");
@@ -13,6 +14,7 @@ function App() {
   const [fileOpen, setFileOpen] = useState("HOME_PAGE");
   const [fileContent, setFileContent] = useState<any>(null);
   const [graph, setGraph] = useState<any>(null);
+  const [explanation, setExplanation] = useState<any>(null);
   async function handleButton() {
     const res = await fetch("http://localhost:8000/health");
     const data = await res.json();
@@ -56,6 +58,31 @@ function App() {
     setFileContent(result);
   }
 
+  async function handleExplain() {
+    setExplanation("Loading...");
+    const response = await fetch("http://localhost:8000/file-context", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ path: fileOpen }),
+    });
+
+    const result = await response.json();
+
+    const explain = await fetch("http://localhost:8000/explain-file", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(result),
+    });
+
+    const explained = await explain.json();
+    setExplanation(explained.explanation);
+    console.log(explained);
+  }
+
   return (
     <div className="app">
       <div className="topbar">
@@ -67,6 +94,12 @@ function App() {
         <button onClick={handleSelect}>{selected}</button>
         <button onClick={handleExec} disabled={!active}>
           Explain!
+        </button>
+        <button
+          onClick={handleExplain}
+          disabled={fileOpen == "HOME_PAGE" || explanation == "Loading..." ? true : false}
+        >
+          Explain file
         </button>
         <button onClick={handleButton}>Health: {status}</button>
       </div>
@@ -87,6 +120,9 @@ function App() {
           {repoTree && fileContent ? (
             <FileArea fileContent={fileContent} />
           ) : null}
+        </div>
+        <div className="explanation-panel">
+          <ReactMarkdown>{explanation || "Select a file and click Explain file"}</ReactMarkdown>
         </div>
       </div>
     </div>

@@ -5,6 +5,7 @@ from pathlib import Path
 from app.services.scanner import root_scan
 from app.services.filereader import file_contents
 from app.services.graphbuilder import build_graph
+from app.services.explainer import file_explain
 
 
 class ScanRequest(BaseModel):
@@ -18,6 +19,15 @@ class ReadRequest(BaseModel):
 class ContextRequest(BaseModel):
     path: str
 
+class ExplainRequest(BaseModel):
+    file: str
+    content: str
+    language: str
+    dependencies: list
+    dependents: list
+    imports: list
+    symbols: list
+    structure: list
 
 CURRENT_PROJECT = {}
 
@@ -76,3 +86,7 @@ async def file_context_builder(req: ContextRequest):
         "symbols": file_analysis.get("symbols", []),
         "structure": file_analysis.get("structure", []),
     }
+    
+@app.post("/explain-file")
+async def explain_file(req: ExplainRequest):
+    return file_explain(req)
