@@ -15,6 +15,10 @@ function App() {
   const [fileContent, setFileContent] = useState<any>(null);
   const [graph, setGraph] = useState<any>(null);
   const [explanation, setExplanation] = useState<any>(null);
+  const [loadingExplanation, setLoadingExplanation] = useState(false);
+  const [explanationCache, setExplanationCache] = useState<
+    Record<string, string>
+  >({});
   async function handleButton() {
     const res = await fetch("http://localhost:8000/health");
     const data = await res.json();
@@ -55,32 +59,46 @@ function App() {
     });
 
     const result = await response.json();
+    if (explanationCache[path]) {
+      setExplanation(explanationCache[path]);
+    } else {
+      setExplanation(null);
+    }
     setFileContent(result);
   }
 
   async function handleExplain() {
-    setExplanation("Loading...");
-    const response = await fetch("http://localhost:8000/file-context", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ path: fileOpen }),
-    });
+    setLoadingExplanation(true);
+    if (explanationCache[fileOpen]) {
+      setExplanation(explanationCache[fileOpen]);
+      setLoadingExplanation(false);
+    } else {
+      const response = await fetch("http://localhost:8000/file-context", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ path: fileOpen }),
+      });
 
-    const result = await response.json();
+      const result = await response.json();
 
-    const explain = await fetch("http://localhost:8000/explain-file", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(result),
-    });
+      const explain = await fetch("http://localhost:8000/explain-file", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(result),
+      });
 
-    const explained = await explain.json();
-    setExplanation(explained.explanation);
-    console.log(explained);
+      const explained = await explain.json();
+      setExplanation(explained.explanation);
+      setExplanationCache((prev) => ({
+        ...prev,
+        [fileOpen]: explained.explanation,
+      }));
+      setLoadingExplanation(false);
+    }
   }
 
   return (
@@ -97,7 +115,9 @@ function App() {
         </button>
         <button
           onClick={handleExplain}
-          disabled={fileOpen == "HOME_PAGE" || explanation == "Loading..." ? true : false}
+          disabled={
+            fileOpen == "HOME_PAGE" || loadingExplanation ? true : false
+          }
         >
           Explain file
         </button>
@@ -122,7 +142,11 @@ function App() {
           ) : null}
         </div>
         <div className="explanation-panel">
-          <ReactMarkdown>{explanation || "Select a file and click Explain file"}</ReactMarkdown>
+          <ReactMarkdown>
+            {loadingExplanation
+              ? "Analyzing file..."
+              : explanation || "Select a file and click Explain file"}
+          </ReactMarkdown>
         </div>
       </div>
     </div>

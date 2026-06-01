@@ -10,28 +10,34 @@ You are a senior software architect.
 Analyze the following file in the context of its codebase.
 
 FILE:
-{context.file}
+{context["file"]}
 
 LANGUAGE:
-{context.language}
+{context["language"]}
 
 DEPENDENCIES:
-{context.dependencies}
+{context["dependencies"]}
 
 DEPENDENTS:
-{context.dependents}
+{context["dependents"]}
 
 STRUCTURE:
-{context.structure}
+{context["structure"]}
 
 SOURCE:
-{context.content}
+{context["content"]}
 
 IMPORTS:
-{context.imports}
+{context["imports"]}
 
 SYMBOLS:
-{context.symbols}
+{context["symbols"]}
+
+DEPENDENCY_CONTEXT:
+{context["dependency_context"]}
+
+DEPENDENT_CONTEXT:
+{context["dependent_context"]}
 
 Provide:
 

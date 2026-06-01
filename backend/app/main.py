@@ -19,6 +19,7 @@ class ReadRequest(BaseModel):
 class ContextRequest(BaseModel):
     path: str
 
+
 class ExplainRequest(BaseModel):
     file: str
     content: str
@@ -28,6 +29,7 @@ class ExplainRequest(BaseModel):
     imports: list
     symbols: list
     structure: list
+
 
 CURRENT_PROJECT = {}
 
@@ -86,7 +88,31 @@ async def file_context_builder(req: ContextRequest):
         "symbols": file_analysis.get("symbols", []),
         "structure": file_analysis.get("structure", []),
     }
-    
+
+
 @app.post("/explain-file")
 async def explain_file(req: ExplainRequest):
-    return file_explain(req)
+    dependency_context = []
+    dependent_context = []
+    for dep in req.dependencies:
+        analysis = CURRENT_PROJECT["analysis"].get(dep, {})
+        dependency_context.append(
+            {
+                "file": dep,
+                "symbols": analysis.get("symbols", []),
+                "structure": analysis.get("structure", []),
+            }
+        )
+    for dep in req.dependents:
+        analysis = CURRENT_PROJECT["analysis"].get(dep, {})
+        dependent_context.append(
+            {
+                "file": dep,
+                "symbols": analysis.get("symbols", []),
+                "structure": analysis.get("structure", []),
+            }
+        )
+    context = req.model_dump()
+    context["dependency_context"] = dependency_context
+    context["dependent_context"] = dependent_context
+    return file_explain(context)
