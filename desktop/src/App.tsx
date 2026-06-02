@@ -19,6 +19,7 @@ function App() {
   const [explanationCache, setExplanationCache] = useState<
     Record<string, string>
   >({});
+  const [repoExplanation, setRepoExplanation] = useState<string | null>(null);
   async function handleButton() {
     const res = await fetch("http://localhost:8000/health");
     const data = await res.json();
@@ -46,6 +47,18 @@ function App() {
     const result = await res.json();
     setRepoTree(result["tree"]);
     setGraph(result["graph"]);
+
+    const response = await fetch("http://localhost:8000/explain-repo", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    const explained = await response.json();
+    setRepoExplanation(explained.explanation);
+    setExplanation(explained.explanation);
+
     handleFileOpen("HOME_PAGE");
   }
 
@@ -62,7 +75,12 @@ function App() {
     if (explanationCache[path]) {
       setExplanation(explanationCache[path]);
     } else {
-      setExplanation(null);
+      if (path == "HOME_PAGE") {
+        //setExplanation(repoExplanation);
+        return ;
+      } else {
+        setExplanation(null);
+      }
     }
     setFileContent(result);
   }

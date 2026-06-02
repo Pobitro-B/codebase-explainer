@@ -6,6 +6,7 @@ from app.services.scanner import root_scan
 from app.services.filereader import file_contents
 from app.services.graphbuilder import build_graph
 from app.services.explainer import file_explain
+from app.services.repoexplainer import repo_explain
 
 
 class ScanRequest(BaseModel):
@@ -66,6 +67,9 @@ async def read_root(req: ScanRequest):
         "graph": graph,
     }
 
+@app.get("/explain-repo")
+async def explain_repo():
+    return repo_explain(CURRENT_PROJECT)
 
 @app.post("/read-file")
 async def read_file(req: ReadRequest):
