@@ -4,6 +4,9 @@ import { open } from "@tauri-apps/plugin-dialog";
 import DirTree from "./components/DirTree";
 import FileArea from "./components/FileArea";
 import ReactMarkdown from "react-markdown";
+import Topbar from "./components/TopBar";
+import SearchBar from "./components/SearchBar";
+import SearchResults from "./components/SearchResults";
 
 function App() {
   const [status, setStatus] = useState("Down");
@@ -20,6 +23,8 @@ function App() {
     Record<string, string>
   >({});
   const [repoExplanation, setRepoExplanation] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<any[]>([]);
   async function handleButton() {
     const res = await fetch("http://localhost:8000/health");
     const data = await res.json();
@@ -48,6 +53,7 @@ function App() {
     setRepoTree(result["tree"]);
     setGraph(result["graph"]);
 
+    setLoadingExplanation(true);
     const response = await fetch("http://localhost:8000/explain-repo", {
       method: "GET",
       headers: {
@@ -56,10 +62,11 @@ function App() {
     });
 
     const explained = await response.json();
+    setLoadingExplanation(false);
     setRepoExplanation(explained.explanation);
     setExplanation(explained.explanation);
 
-    handleFileOpen("HOME_PAGE");
+    await handleFileOpen("HOME_PAGE");
   }
 
   async function handleFileOpen(path) {
@@ -72,16 +79,14 @@ function App() {
     });
 
     const result = await response.json();
-    if (explanationCache[path]) {
-      setExplanation(explanationCache[path]);
-    } else {
-      if (path == "HOME_PAGE") {
-        //setExplanation(repoExplanation);
-        return ;
+    if (path !== "HOME_PAGE") {
+      if (explanationCache[path]) {
+        setExplanation(explanationCache[path]);
       } else {
         setExplanation(null);
       }
     }
+
     setFileContent(result);
   }
 
@@ -119,39 +124,63 @@ function App() {
     }
   }
 
+  async function handleSearch() {
+    if (!searchQuery.trim()) {
+      setSearchResults([]);
+      return;
+    }
+    const response = await fetch("http://localhost:8000/search", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ query: searchQuery }),
+    });
+
+    const results = await response.json();
+    setSearchResults(results.results);
+  }
+
   return (
     <div className="app">
-      <div className="topbar">
-        <input
-          type="text"
-          disabled
-          value={folder ? folder : "Select a repository"}
-        />
-        <button onClick={handleSelect}>{selected}</button>
-        <button onClick={handleExec} disabled={!active}>
-          Explain!
-        </button>
-        <button
-          onClick={handleExplain}
-          disabled={
-            fileOpen == "HOME_PAGE" || loadingExplanation ? true : false
-          }
-        >
-          Explain file
-        </button>
-        <button onClick={handleButton}>Health: {status}</button>
-      </div>
+      <Topbar
+        className="topbar"
+        folder={folder}
+        handleSelect={handleSelect}
+        selected={selected}
+        handleExec={handleExec}
+        active={active}
+        handleExplain={handleExplain}
+        fileOpen={fileOpen}
+        loadingExplanation={loadingExplanation}
+        handleButton={handleButton}
+        status={status}
+      />
       <div className="workspace">
         <div className="sidebar">
           {repoTree ? (
-            <DirTree
-              dirTree={repoTree}
-              depth={1}
-              setCurrFile={setFileOpen}
-              handleOpen={handleFileOpen}
-              fileOpen={fileOpen}
-              graph={graph}
-            />
+            <div>
+              <SearchBar
+                searchQuery={searchQuery}
+                setSearchQuery={setSearchQuery}
+                handleSearch={handleSearch}
+              />
+              <SearchResults
+                results={searchResults}
+                handleOpen={(path) => {
+                  setFileOpen(path);
+                  handleFileOpen(path);
+                }}
+              />
+              <DirTree
+                dirTree={repoTree}
+                depth={1}
+                setCurrFile={setFileOpen}
+                handleOpen={handleFileOpen}
+                fileOpen={fileOpen}
+                graph={graph}
+              />
+            </div>
           ) : null}
         </div>
         <div className="editor">

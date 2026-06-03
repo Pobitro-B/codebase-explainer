@@ -63,5 +63,6 @@ def repo_explain(context):
     )
 
     response = response.json()
+    #print(response)
     response = response["choices"][0]["message"]["content"]
     return {"explanation": response}

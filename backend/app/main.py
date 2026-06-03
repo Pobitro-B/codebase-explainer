@@ -7,6 +7,7 @@ from app.services.filereader import file_contents
 from app.services.graphbuilder import build_graph
 from app.services.explainer import file_explain
 from app.services.repoexplainer import repo_explain
+from app.services.reposearch import repo_search
 
 
 class ScanRequest(BaseModel):
@@ -30,6 +31,10 @@ class ExplainRequest(BaseModel):
     imports: list
     symbols: list
     structure: list
+
+
+class SearchRequest(BaseModel):
+    query: str
 
 
 CURRENT_PROJECT = {}
@@ -67,9 +72,11 @@ async def read_root(req: ScanRequest):
         "graph": graph,
     }
 
+
 @app.get("/explain-repo")
 async def explain_repo():
     return repo_explain(CURRENT_PROJECT)
+
 
 @app.post("/read-file")
 async def read_file(req: ReadRequest):
@@ -120,3 +127,13 @@ async def explain_file(req: ExplainRequest):
     context["dependency_context"] = dependency_context
     context["dependent_context"] = dependent_context
     return file_explain(context)
+
+
+@app.post("/search")
+async def search_repo(req: SearchRequest):
+    return {"results": repo_search(req.query, CURRENT_PROJECT)}
+
+
+@app.post("/chat")
+async def chat_repo():
+    return True
