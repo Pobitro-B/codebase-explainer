@@ -1,2 +1,5 @@
 fastapi
 uvicorn
+tree-sitter-language-pack
+requests
+python-dotenv
