@@ -5,9 +5,10 @@ from pathlib import Path
 from app.services.scanner import root_scan
 from app.services.filereader import file_contents
 from app.services.graphbuilder import build_graph
-from app.services.explainer import file_explain
+from app.services.explainer import file_explain, llm_call
 from app.services.repoexplainer import repo_explain
 from app.services.reposearch import repo_search
+from app.services.chatutils import build_chat_prompt
 
 
 class ScanRequest(BaseModel):
@@ -35,6 +36,10 @@ class ExplainRequest(BaseModel):
 
 class SearchRequest(BaseModel):
     query: str
+
+
+class ChatRequest(BaseModel):
+    message: str
 
 
 CURRENT_PROJECT = {}
@@ -66,7 +71,13 @@ async def read_root(req: ScanRequest):
     graphData = build_graph(tree, req.path)
     graph = graphData["graph"]
     analysis_cache = graphData["analysis"]
-    CURRENT_PROJECT = {"tree": tree, "graph": graph, "analysis": analysis_cache}
+    CURRENT_PROJECT = {
+        "tree": tree,
+        "graph": graph,
+        "analysis": analysis_cache,
+        "summaries": {},
+        "chat_history": [],
+    }
     return {
         "tree": tree,
         "graph": graph,
@@ -75,7 +86,8 @@ async def read_root(req: ScanRequest):
 
 @app.get("/explain-repo")
 async def explain_repo():
-    return repo_explain(CURRENT_PROJECT)
+    CURRENT_PROJECT["repo_explanation"] = repo_explain(CURRENT_PROJECT)
+    return CURRENT_PROJECT["repo_explanation"]
 
 
 @app.post("/read-file")
@@ -126,7 +138,8 @@ async def explain_file(req: ExplainRequest):
     context = req.model_dump()
     context["dependency_context"] = dependency_context
     context["dependent_context"] = dependent_context
-    return file_explain(context)
+    CURRENT_PROJECT["summaries"][req.file] = file_explain(context)["explanation"]
+    return {"explanation": CURRENT_PROJECT["summaries"][req.file]}
 
 
 @app.post("/search")
@@ -135,5 +148,15 @@ async def search_repo(req: SearchRequest):
 
 
 @app.post("/chat")
-async def chat_repo():
-    return True
+async def chat_repo(req: ChatRequest):
+    context = {
+        "repo_summary": CURRENT_PROJECT["repo_explanation"],
+        "file_summaries": CURRENT_PROJECT["summaries"],
+        "chat_history": CURRENT_PROJECT["chat_history"][-10::],
+        "question": req.message,
+    }
+    CURRENT_PROJECT["chat_history"].append({"role":"user", "content":req.message})
+    prompt = build_chat_prompt(context)
+    response = llm_call(prompt)
+    CURRENT_PROJECT["chat_history"].append({"role": "assistant", "content": response})
+    return {"response": response}

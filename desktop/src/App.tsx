@@ -7,6 +7,7 @@ import ReactMarkdown from "react-markdown";
 import Topbar from "./components/TopBar";
 import SearchBar from "./components/SearchBar";
 import SearchResults from "./components/SearchResults";
+import ChatPanel from "./components/ChatPanel";
 
 function App() {
   const [status, setStatus] = useState("Down");
@@ -25,6 +26,14 @@ function App() {
   const [repoExplanation, setRepoExplanation] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState<"repo" | "file" | "chat">("repo");
+  const [chatMessages, setChatMessages] = useState([
+    {
+      role: "assistant",
+      content: "Hi! Ask me anything about this repository.",
+    },
+  ]);
+  const [chatLoading, setChatLoading] = useState(false);
   async function handleButton() {
     const res = await fetch("http://localhost:8000/health");
     const data = await res.json();
@@ -64,8 +73,7 @@ function App() {
     const explained = await response.json();
     setLoadingExplanation(false);
     setRepoExplanation(explained.explanation);
-    setExplanation(explained.explanation);
-
+    setActiveTab("repo");
     await handleFileOpen("HOME_PAGE");
   }
 
@@ -82,6 +90,7 @@ function App() {
     if (path !== "HOME_PAGE") {
       if (explanationCache[path]) {
         setExplanation(explanationCache[path]);
+        setActiveTab("file");
       } else {
         setExplanation(null);
       }
@@ -92,6 +101,7 @@ function App() {
 
   async function handleExplain() {
     setLoadingExplanation(true);
+    setActiveTab("file");
     if (explanationCache[fileOpen]) {
       setExplanation(explanationCache[fileOpen]);
       setLoadingExplanation(false);
@@ -141,6 +151,33 @@ function App() {
     setSearchResults(results.results);
   }
 
+  async function handleChat(message: string) {
+    if (!repoTree) return;
+    setChatLoading(true);
+    const userMessage = {
+      role: "user",
+      content: message,
+    };
+
+    setChatMessages((prev) => [...prev, userMessage]);
+
+    const response = await fetch("http://localhost:8000/chat", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ message }),
+    });
+
+    const result = await response.json();
+
+    setChatMessages((prev) => [
+      ...prev,
+      { role: "assistant", content: result.response },
+    ]);
+    setChatLoading(false);
+  }
+
   return (
     <div className="app">
       <Topbar
@@ -188,12 +225,40 @@ function App() {
             <FileArea fileContent={fileContent} />
           ) : null}
         </div>
-        <div className="explanation-panel">
-          <ReactMarkdown>
-            {loadingExplanation
-              ? "Analyzing file..."
-              : explanation || "Select a file and click Explain file"}
-          </ReactMarkdown>
+        <div className="right-panel">
+          <div className="panel-tabs">
+            <button onClick={() => setActiveTab("repo")}>Repo Overview</button>
+
+            <button onClick={() => setActiveTab("file")}>
+              File Explanation
+            </button>
+
+            <button onClick={() => setActiveTab("chat")}>AI Assistant</button>
+          </div>
+          <div className="explanation-panel">
+            {activeTab == "repo" && (
+              <ReactMarkdown>
+                {loadingExplanation
+                  ? "Analyzing files..."
+                  : repoExplanation || "Select a directory and click Explain"}
+              </ReactMarkdown>
+            )}
+            {activeTab == "file" && (
+              <ReactMarkdown>
+                {loadingExplanation
+                  ? "Analyzing file..."
+                  : explanation || "Select a file and click Explain file"}
+              </ReactMarkdown>
+            )}
+            {activeTab == "chat" && (
+              <ChatPanel
+                messages={chatMessages}
+                setChatMessages={setChatMessages}
+                onSend={handleChat}
+                chatLoading={chatLoading}
+              />
+            )}
+          </div>
         </div>
       </div>
     </div>
