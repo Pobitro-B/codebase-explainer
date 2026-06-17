@@ -1,8 +1,6 @@
 from pathlib import Path
 from app.static.extensions import EXTENSION_MAP
 from app.services.parser.importresolver import extract
-from tree_sitter_language_pack import process, ProcessConfig
-
 
 def file_contents(path: str):
     """_summary_
@@ -48,6 +46,3 @@ def file_contents(path: str):
             },
             "imports": [],
         }
-
-
-(file_contents("./app/services/filereader.py"))

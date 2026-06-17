@@ -54,7 +54,8 @@ Focus on explaining what the file currently does.
 """
 
 
-def file_explain(context):
+def llm_call(content):
+    print("llm called")
     response = requests.post(
         "https://openrouter.ai/api/v1/chat/completions",
         headers={
@@ -64,12 +65,21 @@ def file_explain(context):
         data=json.dumps(
             {
                 "model": "openai/gpt-oss-120b:free",
-                "messages": [{"role": "user", "content": build_prompt(context)}],
+                "messages": [{"role": "user", "content": content}],
                 "reasoning": {"enabled": True},
             }
         ),
     )
 
     response = response.json()
-    response = response["choices"][0]["message"]["content"]
+    print("llm call finished")
+    if "choices" in response:
+        response = response["choices"][0]["message"]["content"]
+    else:
+        response = f"LLM Error: {response}"
+        print(response)
+    return response
+
+def file_explain(context):
+    response = llm_call(build_prompt(context))
     return {"explanation": response}

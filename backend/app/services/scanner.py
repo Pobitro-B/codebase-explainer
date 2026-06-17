@@ -14,6 +14,7 @@ IGNORE_DIRS = set(
         ".env",
         ".next",
         ".idea",
+        ".venv"
     ]
 )
 
